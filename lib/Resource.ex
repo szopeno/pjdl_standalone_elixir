@@ -1,0 +1,2 @@
+defmodule RangeResource do
+end

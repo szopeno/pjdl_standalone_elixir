@@ -1,0 +1,56 @@
+job "Moja prosta praca"
+    short "name" 
+    results_visibility .contributors
+    results "http://url.com"
+    instantiation .lazy 
+    resources 
+        instance
+            vector "długa nazwa" embedded "file" 
+                dimensions .infile
+            variable "nazwa" value 20
+                dimensions 10 
+        instance
+            array "inna INSTANCJA" 
+                dimensions 999 102 
+    scripts 
+        script "first" embedded "hello.js" .js
+        script "second" remote "http://website.test.com" .cpp
+
+    activity "ala" 
+        condition 
+            not 
+		and
+                    or 
+			completed "cel osiągnięty" 
+			completed "inny cel osiągnięty" 
+		    equals variable "nazwa" value "10" 
+        run "hello" .sync 
+        ask "trivia" to_url "http://tutaj.wyniki.pl/heja?a=1&3"
+
+    activity "second activity"
+        condition
+            equals variable "nazwa" value "10" 
+        http put "a"
+            from value "a"
+            result url "b"
+        distribute "first"
+            instance 
+                resource "A" .inject
+                resource "B" .websockets
+            instance 
+                resource "C" .raw
+                resource "D" .get
+                resource "EEEEE" .raw
+            results
+                url "a"
+                combines self "hej"
+                result_verification .none
+            events
+                task_completed
+                    http put "a"
+                        from value "a"
+                    run "name"
+                    complete "doal"
+                    retry
+                    wait_and_retry 20
+                    fail_job

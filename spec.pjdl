@@ -1,0 +1,38 @@
+# [ X | Y ] means one of X or Y, ( X ) means X is optional (otherwise mandatory)
+# "many" means many such nodes may appear (otherwise only one such node)
+job
+    short "description string"
+    ( results_visibility [ .public | .contributors | .team | .owner ] )
+    ( results "url where to store the final result" )
+    ( instantiation [ .instant | .lazy ] )
+    
+    resources
+        instance  # many
+	    [ vector | array | cube | raw | folder | variable ] "name" ( [ embedded "file" | remote "url"  ] ) ( [ .copy | .shared_rw | .shared_ro | .ask ] ) ( value "value" ) # many, value only for variable
+		dimensions 1 2 3 (.infile) # for vector, array, cube only, no numbers when .infile specified
+
+    scripts 
+        script "name" ( [ embedded "name" | remote "url" ] ) ( [ .cpp | .js | .ex ] ) # many
+
+    activity # many
+        condition # only for .oncondition
+            [ and | xor | or | not ] # children might be and, xor, or, not or basic
+            [ completed "goal" | oninit | exists "url" | equals EQ_ATTRIBS ] # only one of those
+                EQ_ATTRIBS := [ variable | value | url ] "value or url" # exactly two attribs
+        run "script" ( [ .async | .sync ] ) # many
+        http [ .get | .put | .post | .delete ] "url" # many
+            from [ .url "url" | .value "value" | resource "resource" ] # only for put and post
+            result [ .url "url" |  resource "resource" ]
+        ask "form" ([ to_url | to_resource ] "url" )# many
+        distribute "script" # many
+            instance # many or number of tasks to create, -1 means as many as possible
+                input "object" ( [ .inject | .websockets | .get ] ) # attributes not for raw resources - many
+            ( results )
+                ( url "where to store partial results" )
+                ( combines [ .self "script" | .min | .max | .avg | .sum | .nomerge | .vector | .array ] )
+                ( result_verification [ .none | .majority_voting | .weighted_voting | .spot_checking | .self "script" ] )
+            ( events )
+                [ task_completed | task_failed | task_started | job_completed | job_failed | job_started | verification_failed ] # many
+                    [ run "script" | http [ .get | .post | .put | .delete ] "url" | complete "goal" | fail | retry | wait_and_retry 1 ] # many
+                
+        
